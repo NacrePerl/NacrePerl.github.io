@@ -1,0 +1,1 @@
+[[!map pages="blog/posts/2026/07/01/* and ! blog/posts/2026/07/01/*/*"]]
