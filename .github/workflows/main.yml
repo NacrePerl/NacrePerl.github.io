@@ -8,6 +8,18 @@ on:
   push:
     branches: [ source ]
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -63,29 +75,25 @@ jobs:
           cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
           cpanm -n YAML::Any YAML::XS Sort::Naturally LaTeXML
 
-      - name: Set up worktree and Run ikiwiki
+      - name: Run ikiwiki
         run: |
-          T_BRANCH='gh-pages'
           git config --global --add safe.directory $PWD
-          git config extensions.worktreeConfig true
-
-          git show-ref --verify --quiet refs/heads/$T_BRANCH                    \
-            && git worktree add          -B $T_BRANCH ../_site origin/$T_BRANCH \
-            || git worktree add --orphan -B $T_BRANCH ../_site
 
           eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
           export PERL5LIB="$PERL5LIB:./.ikiwiki-plugins/p5-IkiWiki-Plugin-github/lib"
 
           ikiwiki --setup NacrePerl.setup
 
-      - name: Commit to gh-pages
-        run: |
-          cd ../_site
-          git config --worktree push.default simple
-          git config --worktree user.name github-actions
-          git config --worktree user.email github-actions@github.com
-          COMMIT_MESSAGE="Publishing site on `date "+%Y-%m-%d %H:%M:%S"` from `git log -n 1 --format='commit %h - %s' $GITHUB_SHA`"
-          git add --all && git commit -m "$COMMIT_MESSAGE" && git push origin gh-pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: '../_site'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
 
       - name: Push checkout back
         run: |
