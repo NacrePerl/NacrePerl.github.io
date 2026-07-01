@@ -1,0 +1,7 @@
+## [[Blog|blog]]
+
+[[!inline pages="page(blog/posts/*/*/*/*) and !*/Discussion and !tagged(draft) and !*/gfx and !*/gfx/*"
+show="12"
+sort="-meta(date) -age title"
+template=inlinepage
+archive=yes feeds=yes]]
