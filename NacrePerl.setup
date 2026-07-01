@@ -41,6 +41,7 @@ add_plugins:
 - sidebar
 - autoindex
 - txt
+- github
 - format
 - highlight
 #- html
@@ -88,7 +89,8 @@ hardlink: 0
 # group for wrappers to run in
 #wrappergroup: ikiwiki
 # extra library and plugin directories
-libdirs: []
+libdirs:
+- './.ikiwiki-plugins/p5-IkiWiki-Plugin-github/lib'
 # environment variables
 ENV: {}
 # time zone name
@@ -403,3 +405,7 @@ tag_autocreate_commit: 1
 # typography plugin
 # Text::Typography attributes value
 #typographyattributes: 3
+
+github:
+ repo: NacrePerl/NacrePerl.github.io
+ branch: source
