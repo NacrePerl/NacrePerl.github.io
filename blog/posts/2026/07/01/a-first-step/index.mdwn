@@ -2,6 +2,43 @@
 [[!meta author="zaki"]]
 [[!meta description=""]]
 
-TODO
+Parsing Perl is undecidable. Yes, you heard that correctly.
+There's a proof of this by Jeffrey Kegler
+[1](https://perlmonks.org/?node_id=663393),
+[2](https://jeffreykegler.github.io/personal/undecide/undecide.html)
+[3](https://blogs.perl.org/users/jeffrey_kegler/2011/10/perl-and-parsing-11-are-all-perl-programs-parseable.html),
+because as Kegler writes:
+
+> Perl 5 is unparseable because it gives the programmer Turing-complete power before compile time.
+
+To understand this, we have to dig into the specifics of the `perl`
+interpreter.
+
+What does it mean by compile time? Well, `perl` has
+[special code blocks](https://perldoc.perl.org/perlmod#BEGIN%2C-UNITCHECK%2C-CHECK%2C-INIT-and-END)
+that it runs at various points as it passes over code.  The big passes can be
+considered what is called the *compile phase* and *run phase* and most of the
+time, they do exactly what they sound like for each phase, but you can run code
+in the compile phase (early processing using [`BEGIN`](https://perldoc.perl.org/functions/BEGIN))
+and compile code in the run phase ([`eval`](https://perldoc.perl.org/functions/eval)).
+
+An example is how:
+
+[[!format perl """
+print "1\n";
+BEGIN { print "2\n" }
+print "3\n";
+BEGIN { print "4\n" }
+"""]]
+
+gives the output
+
+[[!format txt """
+2
+4
+1
+3
+"""]]
+
 
 [[!tag draft]]
