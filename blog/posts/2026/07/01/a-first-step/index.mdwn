@@ -48,5 +48,37 @@ gives the output
 as the `BEGIN` lines fire off first as the source is being read in
 (note: `BEGIN`/`END` are from [AWK](https://www.gnu.org/software/gawk/manual/html_node/Using-BEGIN_002fEND.html)).
 
+So, what goes on during this compile-phase? Some of this is covered in the
+[`perlguts`](https://perldoc.perl.org/perlguts#Compiled-code) documentation: as
+it compiles the code, `perl` builds a compile tree (or optree). The individual
+nodes of this tree are called `OP`s after the
+[`typedef struct op OP;`](https://metacpan.org/release/NWCLARK/perl-5.8.9/source/perl.h#L2222)
+with the actual `struct op` and its subclasses (`struct`s that share the same
+base) in [op.h](https://metacpan.org/release/NWCLARK/perl-5.8.9/source/op.h#L248).
+
+This optree lives at the C level, but in 1996, Malcolm Beattie worked on "Perl
+Compiler Kit"[^compiler-kit-tarball], which Malcolm describes in [an article in The Perl
+Journal](https://www.foo.be/docs/tpj/issues/vol1_2/tpj0102-0007.html), that contains the
+`B` namespace of modules. This includes the `B.pm` module which constructs Perl
+objects that wrap the C side of the optree for walking in Perl code.
+It also contains several backends that emit an alternative representation of
+the optree:
+
+ - [`B::C`](https://p3rl.org/B::C): freezes the optree as C code that uses the
+   Perl internal API to build the optree so that parsing can be skipped;
+ - [`B::CC`](https://p3rl.org/B::CC): a partial backend that attempts to be an
+   optimising compiler to C (e.g., unrolling operations); and
+ - Pretty-printers such as
+   [`B::Terse`](https://p3rl.org/B::Terse),
+   [`B::Concise`](https://p3rl.org/B::Concise),
+   [`B::Deparse`](https://p3rl.org/B::Deparse).
+
+Eventually some of the `B` namespace became part of the Perl distribution
+itself since `perl v5.005` (in 1998).
+
+[^compiler-kit-tarball]: The orignal tarballs are on
+[BackPAN under author MICB](https://backpan.perl.org/authors/id/M/MI/MICB/) under the names
+`Compiler-*.tar.gz`.
+
 
 [[!tag draft]]
