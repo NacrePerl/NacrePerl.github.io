@@ -110,9 +110,9 @@ that follows the syntactical order with three `nextstate` `OP`s (marking the sta
 Following these are various scalar assignments via the `sassign` `OP`.
 The first two `sassign` `OP`s are directly assigning an `IV` (integer value)
 literal via the `const` `OP` to the private `SV` (scalar value) via the
-`padsv` `OP` (`$x` and `$y`).
+`padsv` `OP` (each into `$x` and `$y`).
 The final `sassign` has an `add` `OP` as a child which accesses the previous two
-private `SV`s and then assigning to a final private `SV` `$z`.
+private `SV`s and then assigns to a final private `SV` `$z`.
 
 The symbols along the left margin (`g`, `1`, `2`, `5`, ...) and the `->{_symbol_}` at
 the end of the lines are indicators of the execution order which threads over
