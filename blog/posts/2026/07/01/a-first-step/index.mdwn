@@ -2,7 +2,9 @@
 [[!meta author="zaki"]]
 [[!meta description=""]]
 
-Parsing Perl (statically) is undecidable. Yes, you heard that correctly.
+Parsing Perl (statically) is undecidable. Yes, you heard that correctly.  It is
+not unique in this, but it does have some properties which make it trickier
+than other programming languages that keep their grammars context-free.
 There is a proof of this by Jeffrey Kegler
 [1](https://perlmonks.org/?node_id=663393),
 [2](https://jeffreykegler.github.io/personal/undecide/undecide.html),
@@ -11,15 +13,16 @@ because as Kegler writes:
 
 > Perl 5 is unparseable because it gives the programmer Turing-complete power before compile time.
 
-In practice, most Perl can be parsed statically, but this is just the worst-case scenario.
+In practice, most Perl **can** be parsed statically (which is why [PPI](https://p3rl.org/PPI) exists),
+but this is just the worst-case scenario.
 
 To understand why this is, we have to dig into the specifics of the `perl`
 interpreter.
 
-What does it mean by compile time? Well, `perl` has
+What does it mean by compile time? Well, Perl has
 [special code blocks](https://perldoc.perl.org/perlmod#BEGIN%2C-UNITCHECK%2C-CHECK%2C-INIT-and-END)
-that it runs at various points as it passes over code.  The big passes can be
-considered what is called the *compile phase* and *run phase* and most of the
+that it runs at various points as it passes over the code. The big passes can
+be considered what are called the *compile phase* and *run phase* and most of the
 time, they do exactly what they sound like for each phase, but you can run code
 in the compile phase (early processing using [`BEGIN`](https://perldoc.perl.org/functions/BEGIN))
 and compile code in the run phase ([`eval`](https://perldoc.perl.org/functions/eval)).
