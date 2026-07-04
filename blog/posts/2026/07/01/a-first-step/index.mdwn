@@ -80,7 +80,8 @@ itself since `perl v5.005` (in 1998).
 
 To see what the optree for a given expression looks like, we can run
 
-[[!format console """
+<!-- txt:console -->
+[[!format txt """
 $ perl -MO=Concise -e 'my $x = 23; my $y = 37; my $z = $x + $y'
 -e syntax OK
 g  <@> leave[1 ref] vKP/REFC ->(end)
