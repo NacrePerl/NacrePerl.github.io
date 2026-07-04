@@ -1,11 +1,12 @@
 [[!meta title="A First Step"]]
 [[!meta author="zaki"]]
-[[!meta description=""]]
+[[!meta description="Parsing Perl (statically) is undecidable. Yes, you heard that correctly.  It is
+not unique in this, but..."]]
 
 Parsing Perl (statically) is undecidable. Yes, you heard that correctly.  It is
 not unique in this, but it does have some properties which make it trickier
 than other programming languages that keep their grammars context-free.
-There is a proof of this by Jeffrey Kegler
+There is a proof of this by [Jeffrey Kegler](https://jeffreykegler.github.io/personal/)
 [1](https://perlmonks.org/?node_id=663393),
 [2](https://jeffreykegler.github.io/personal/undecide/undecide.html),
 [3](https://blogs.perl.org/users/jeffrey_kegler/2011/10/perl-and-parsing-11-are-all-perl-programs-parseable.html),
@@ -18,6 +19,8 @@ but this is just the worst-case scenario.
 
 To understand why this is, we have to dig into the specifics of the `perl`
 interpreter.
+
+# Preparing the ground
 
 What does it mean by compile time? Well, Perl has
 [special code blocks](https://perldoc.perl.org/perlmod#BEGIN%2C-UNITCHECK%2C-CHECK%2C-INIT-and-END)
@@ -47,8 +50,9 @@ gives the output
 
 as the `BEGIN` lines fire off first as the source is being read in
 (note: `BEGIN`/`END` are from [AWK](https://www.gnu.org/software/gawk/manual/html_node/Using-BEGIN_002fEND.html)).
+Using `print` is a trivial example here, but early processing can change how later code gets parsed.
 
-# Compiling the optree
+# Taking root
 
 So, what goes on during this compile-phase? Some of this is covered in the
 [`perlguts`](https://perldoc.perl.org/perlguts#Compiled-code) documentation: as
@@ -58,12 +62,16 @@ nodes of this tree are called `OP`s after the
 with the actual `struct op` and its subclasses (`struct`s that share the same
 base) in [op.h](https://metacpan.org/release/NWCLARK/perl-5.8.9/source/op.h#L248).
 
-This optree lives at the C level, but in 1996, Malcolm Beattie worked on "Perl
-Compiler Kit"[^compiler-kit-tarball], which Malcolm describes in [an article in The Perl
-Journal](https://www.foo.be/docs/tpj/issues/vol1_2/tpj0102-0007.html), that contains the
-`B` namespace of modules. This includes the `B.pm` module which constructs Perl
-objects that wrap the C side of the optree for walking in Perl code.
-It also contains several backends that emit an alternative representation of
+# Lifting a tree
+
+This optree lives at the C level, but in 1996, [Malcolm Beattie](https://www.ukuug.org/bios-profiles/MBeattie/) worked on
+"Perl Compiler Kit"[^compiler-kit-tarball] that contains the `B` namespace of modules
+(which Malcolm describes in [an article in The Perl
+Journal](https://www.foo.be/docs/tpj/issues/vol1_2/tpj0102-0007.html)).
+This namespace includes the [`B.pm`](https://p3rl.org/B) module
+for walking the optree in Perl code by
+constructing Perl objects that wrap the C structs.
+The namespace also contains several backends that emit an alternative representation of
 the optree:
 
  - [`B::C`](https://p3rl.org/B::C): freezes the optree as C code that uses the
@@ -76,7 +84,10 @@ the optree:
    [`B::Deparse`](https://p3rl.org/B::Deparse).
 
 Eventually some of the `B` namespace became part of the Perl distribution
-itself since `perl v5.005` (in 1998).
+itself since `perl v5.005` (in 1998) and are updated as the Perl internals get
+updated. The `B::C` and `B::CC` backends are [updated separately](https://github.com/rurban/perl-compiler).
+
+# Walking the branches
 
 To see what the optree for a given expression looks like, we can run
 
@@ -120,8 +131,45 @@ the same `OP` nodes (via the `OP* op_next` member of the `OP` `struct`).
 Following this from the `enter` `OP`, we can see the `const` `OP` for the `IV` 23
 executes first within the first statement.
 
+# Pruning and grafting
+
 There is more in-depth documentation in the [`perloptree`](https://metacpan.org/dist/B-C/view/perloptree.pod) POD found in
-the `B-C` distribution.
+the `B-C` distribution. Also, here I did not give much detail on what `IV` and `SV` are: these are discussed in
+
+- [`perlguts`](https://perldoc.perl.org/perlguts),
+- `illguts` or Illustrated Guts:
+  [illguts-0.49 dist](https://metacpan.org/release/RURBAN/illguts-0.49),
+  [PDF](https://api.metacpan.org/v1/source/RURBAN/illguts-0.49/illguts.pdf),
+  [repo](https://github.com/rurban/illguts).
+
+There are also a few tutorials:
+
+- [Where Wizards Fear To Tread by Simon Cozens ](https://www.perl.com/pub/2002/05/07/optree.html/)
+- [Perl 5 Internals by Simon Cozens](https://web.archive.org/web/20050205214309/http://www.netthink.co.uk:80/downloads/internals/)
+
+Of note, the exact layout of the tree and `OP`s used can vary across versions
+of the `perl` interpreter; therefore, the `B` modules such as `B::Deparse` are updated
+alongside these changes on each `perl` release to account for this,
+but code that uses them may need changes to remain compatible.
+
+An example of this is the [`B::DeparseTree`](https://p3rl.org/B::DeparseTree)
+module which was created by Rocky Bernstein to determine which part of the code
+string a particular `OP` is derived from, but the tests have drifted away from
+newer `perl` releases (more about what motivated this tool at
+[4](https://p3rl.org/Devel::Trepan),
+[5](https://p3rl.org/Devel::Trepan::Deparse),
+[6](https://github.com/Trepan-Debuggers/Perl-Devel-Trepan),
+[7](https://www.youtube.com/watch?v=YqqazYfjFXs),
+[8](https://www.youtube.com/watch?v=gREriCbwW8E),
+[9](https://rocky.github.io/YAPC2018-deparse/)).
+
+# Saving seeds
+
+Even if the optree can change across versions, it can still be a useful tool.
+In 2005, Gary Jackson used the `B` modules to create a proof-of-concept type
+checker as a project (cf., G. Jackson. "[Securing Perl with Type Inference](https://web.archive.org/web/20060601221344/http://www.umiacs.umd.edu/~bargle/project2.pdf)". 2005.).
+The tests for the minimal type checker continue to work and I have created a repository that [fixes some of the minor build bitrot](https://github.com/NacrePerl/perl-Devel-TypeCheck).
+This can make for an initial prototype towards a more complete type checker.
 
 [^compiler-kit-tarball]: The original tarballs are on
 [BackPAN under author MICB](https://backpan.perl.org/authors/id/M/MI/MICB/) under the names
