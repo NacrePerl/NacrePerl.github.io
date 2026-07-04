@@ -45,5 +45,8 @@ gives the output
 3
 """]]
 
+as the `BEGIN` lines fire off first as the source is being read in
+(note: `BEGIN`/`END` are from [AWK](https://www.gnu.org/software/gawk/manual/html_node/Using-BEGIN_002fEND.html)).
+
 
 [[!tag draft]]
