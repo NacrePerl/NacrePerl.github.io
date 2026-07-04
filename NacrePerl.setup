@@ -21,7 +21,7 @@ srcdir: .
 # where to build the wiki
 destdir: ../_site
 # base url to the wiki
-url: https://NacrePerl.github.io/
+url: https://NacrePerl.github.io
 reverse_proxy: 0
 # mode for cgi_wrapper (can safely be made suid)
 cgi_wrappermode: 06755
