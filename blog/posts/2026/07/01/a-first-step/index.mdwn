@@ -48,6 +48,8 @@ gives the output
 as the `BEGIN` lines fire off first as the source is being read in
 (note: `BEGIN`/`END` are from [AWK](https://www.gnu.org/software/gawk/manual/html_node/Using-BEGIN_002fEND.html)).
 
+# Compiling the optree
+
 So, what goes on during this compile-phase? Some of this is covered in the
 [`perlguts`](https://perldoc.perl.org/perlguts#Compiled-code) documentation: as
 it compiles the code, `perl` builds a compile tree (or optree). The individual
@@ -76,7 +78,51 @@ the optree:
 Eventually some of the `B` namespace became part of the Perl distribution
 itself since `perl v5.005` (in 1998).
 
-[^compiler-kit-tarball]: The orignal tarballs are on
+To see what the optree for a given expression looks like, we can run
+
+[[!format console """
+$ perl -MO=Concise -e 'my $x = 23; my $y = 37; my $z = $x + $y'
+-e syntax OK
+g  <@> leave[1 ref] vKP/REFC ->(end)
+1     <0> enter v ->2
+2     <;> nextstate(main 1 -e:1) v:{ ->3
+5     <2> sassign vKS/2 ->6
+3        <$> const(IV 23) s ->4
+4        <0> padsv[$x:1,4] sRM*/LVINTRO ->5
+6     <;> nextstate(main 2 -e:1) v:{ ->7
+9     <2> sassign vKS/2 ->a
+7        <$> const(IV 37) s ->8
+8        <0> padsv[$y:2,4] sRM*/LVINTRO ->9
+a     <;> nextstate(main 3 -e:1) v:{ ->b
+f     <2> sassign vKS/2 ->g
+d        <2> add[t4] sK/2 ->e
+b           <0> padsv[$x:1,4] s ->c
+c           <0> padsv[$y:2,4] s ->d
+e        <0> padsv[$z:3,4] sRM*/LVINTRO ->f
+"""]]
+
+This tree has two orders to it.
+
+The tree represented by the indentation going from top to bottom here
+is the pre-order traversal
+that follows the syntactical order with three `nextstate` `OP`s (marking the start of a statement).
+Following these are various scalar assignments via the `sassign` `OP`.
+The first two `sassign` `OP`s are directly assigning an `IV` (integer value)
+literal via the `const` `OP` to the private `SV` (scalar value) via the
+`padsv` `OP` (`$x` and `$y`).
+The final `sassign` has an `add` `OP` as a child which accesses the previous two
+private `SV`s and then assigning to a final private `SV` `$z`.
+
+The symbols along the left margin (`g`, `1`, `2`, `5`, ...) and the `->{_symbol_}` at
+the end of the lines are indicators of the execution order which threads over
+the same `OP` nodes (via the `OP* op_next` member of the `OP` `struct`).
+Following this from the `enter` `OP`, we can see the `const` `OP` for the `IV` 23
+executes first within the first statement.
+
+There is more in-depth documentation in the [`perloptree`](https://metacpan.org/dist/B-C/view/perloptree.pod) POD found in
+the `B-C` distribution.
+
+[^compiler-kit-tarball]: The original tarballs are on
 [BackPAN under author MICB](https://backpan.perl.org/authors/id/M/MI/MICB/) under the names
 `Compiler-*.tar.gz`.
 
