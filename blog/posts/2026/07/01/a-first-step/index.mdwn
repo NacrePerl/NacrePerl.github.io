@@ -2,16 +2,18 @@
 [[!meta author="zaki"]]
 [[!meta description=""]]
 
-Parsing Perl is undecidable. Yes, you heard that correctly.
-There's a proof of this by Jeffrey Kegler
+Parsing Perl (statically) is undecidable. Yes, you heard that correctly.
+There is a proof of this by Jeffrey Kegler
 [1](https://perlmonks.org/?node_id=663393),
-[2](https://jeffreykegler.github.io/personal/undecide/undecide.html)
+[2](https://jeffreykegler.github.io/personal/undecide/undecide.html),
 [3](https://blogs.perl.org/users/jeffrey_kegler/2011/10/perl-and-parsing-11-are-all-perl-programs-parseable.html),
 because as Kegler writes:
 
 > Perl 5 is unparseable because it gives the programmer Turing-complete power before compile time.
 
-To understand this, we have to dig into the specifics of the `perl`
+In practice, most Perl can be parsed statically, but this is just the worst-case scenario.
+
+To understand why this is, we have to dig into the specifics of the `perl`
 interpreter.
 
 What does it mean by compile time? Well, `perl` has
