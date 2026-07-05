@@ -36,7 +36,7 @@ rcs: git
 # plugins to add to the default configuration
 add_plugins:
 - goodstuff
-- theme
+#- theme
 - trail
 - sidebar
 - autoindex
@@ -44,14 +44,15 @@ add_plugins:
 - github
 - format
 - highlight
+- ikistrap
 #- html
-#- underlay
+- underlay
 # plugins to disable
 disable_plugins: [ htmlscrubber ]
 # additional directory to search for template files
-templatedir: /usr/share/ikiwiki/templates
+templatedir: ./.ikiwiki-plugins/ikistrap/templates
 # base wiki source location
-underlaydir: /usr/share/ikiwiki/basewiki
+underlaydir: ./.ikiwiki-plugins/ikistrap/basewiki
 # display verbose messages?
 #verbose: 1
 # log to syslog?
@@ -91,6 +92,7 @@ hardlink: 0
 # extra library and plugin directories
 libdirs:
 - './.ikiwiki-plugins/p5-IkiWiki-Plugin-github/lib'
+- './.ikiwiki-plugins/ikistrap/lib'
 # environment variables
 ENV: {}
 # time zone name
@@ -290,7 +292,7 @@ multimarkdown: 1
 
 # theme plugin
 # name of theme to enable
-theme: goldtype
+#theme: goldtype
 
 # websetup plugin
 # list of plugins that cannot be enabled/disabled via the web interface
