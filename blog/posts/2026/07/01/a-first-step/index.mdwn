@@ -145,7 +145,7 @@ the `B-C` distribution. Also, here I did not give much detail on what `IV` and `
 There are also a few tutorials:
 
 - [Where Wizards Fear To Tread by Simon Cozens ](https://www.perl.com/pub/2002/05/07/optree.html/)
-- [Perl 5 Internals by Simon Cozens](https://web.archive.org/web/20050205214309/http://www.netthink.co.uk:80/downloads/internals/)
+- [Perl 5 Internals by Simon Cozens](http://www.faqs.org/docs/perl5int/) ([Wayback Machine archive](https://web.archive.org/web/20050205214309/http://www.netthink.co.uk:80/downloads/internals/))
 
 Of note, the exact layout of the tree and `OP`s used can vary across versions
 of the `perl` interpreter; therefore, the `B` modules such as `B::Deparse` are updated
